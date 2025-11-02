@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Heart, MessageCircle, Sparkles, PenLine, TrendingUp, Users, EyeOff, LogIn, UserPlus } from "lucide-react"
 import Navbar from "@/components/ui/navbar"
+
+import axios from "axios"
 // Emotion types
 const emotions = {
   happy: { emoji: "😊", color: "bg-yellow-500", label: "Happy" },
@@ -222,7 +224,7 @@ export default function FeelDiary() {
     }, 1500)
   }
 
-  const saveEntry = () => {
+  const saveEntry = async() => {
     if (!journalContent.trim() || !currentEmotion) return
 
     const newEntry: JournalEntry = {
@@ -243,6 +245,26 @@ export default function FeelDiary() {
     setIsAnonymous(false)
     setActiveTab("myjournal")
   }
+
+  const postJournal = async() => {
+     const newEntry: JournalEntry = {
+       id: Date.now().toString(),
+       content: journalContent,
+       emotion: currentEmotion || "neutral",
+       aiReview: aiReview,
+       timestamp: Date.now(),
+       author: "You",
+       likes: 0
+     }
+   try{
+      await axios.post('http://localhost:5000/api/journal/post', newEntry)
+      alert('Journal entry posted successfully!')
+   }
+    catch(error){ 
+      alert('Failed to post journal entry. Please try again later.')
+    }
+    }
+
 
   const handleSignIn = () => {
     if (!username.trim() || !password.trim()) return
@@ -660,7 +682,6 @@ export default function FeelDiary() {
                     )}
                   </Button>
 
-                  {currentEmotion && (
                     <Button
                       onClick={saveEntry}
                       className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
@@ -668,7 +689,15 @@ export default function FeelDiary() {
                     >
                       Save Entry
                     </Button>
-                  )}
+                
+                    <Button
+                      onClick={postJournal}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                      size="lg"
+                    >
+                      Post
+                    </Button>
+                
                 </div>
 
                 {currentEmotion && (
