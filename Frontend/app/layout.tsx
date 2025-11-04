@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Poppins, Geist_Mono, Dancing_Script } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
+import { JournalContextProvider } from "@/components/context/journalContext"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,8 +31,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} ${dancingScript.variable} font-sans antialiased`}>
-        {children}
-        <Analytics />
+        <JournalContextProvider>
+          {children}
+        </JournalContextProvider>
       </body>
     </html>
   )

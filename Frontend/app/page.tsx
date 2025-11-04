@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
+import { useContext } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sparkles, PenLine, EyeOff, LogIn, UserPlus, BookOpen } from "lucide-react"
 import { Header } from "@/components/header"
@@ -13,8 +14,11 @@ import { JournalSidebar, type JournalEntry } from "@/components/journal-sidebar"
 import { JournalEditor } from "@/components/journal-editor"
 import { RecommendationsPanel } from "@/components/recommendations-panel"
 import type { EmotionKey } from "@/components/emotion-badge"
+import axios from "axios"
+import { JournalEntryContext } from "@/components/context/journalContext"
 
 export default function FeelDiary() {
+  let {entries, setEntries,getEntries} = useContext (JournalEntryContext);
   const [currentView, setCurrentView] = useState<"landing" | "dashboard">("landing")
   const [myEntries, setMyEntries] = useState<JournalEntry[]>([])
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null)
@@ -28,7 +32,25 @@ export default function FeelDiary() {
     if (stored) {
       setMyEntries(JSON.parse(stored))
     }
+    alert(JSON.stringify(entries));
+    // getAllJournals()
+        getEntries()
   }, [])
+
+  useEffect(() => {
+   alert(JSON.stringify(entries));
+  }, [entries])
+
+  const getAllJournals = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/journal/getAll');
+      console.log('Journals fetched:', response.data);
+      // You can set the fetched data to state if needed
+      // setMyEntries(response.data);
+    } catch (error) {
+      console.error('Error fetching journals:', error);
+    }
+  }
 
   useEffect(() => {
     if (myEntries.length > 0) {
@@ -45,7 +67,7 @@ export default function FeelDiary() {
     setPassword("")
   }
 
-  const handleSaveEntry = (content: string, emotion: EmotionKey, aiReview: string, isAnonymous: boolean) => {
+  const handleSaveEntry = async (content: string, emotion: EmotionKey, aiReview: string, isAnonymous: boolean) => {
     const newEntry: JournalEntry = {
       id: Date.now().toString(),
       content,
@@ -54,10 +76,14 @@ export default function FeelDiary() {
       timestamp: Date.now(),
       author: isAnonymous ? "Anonymous" : "You",
       likes: 0,
+      userId:11,
       isAnonymous,
     }
     setMyEntries([newEntry, ...myEntries])
     setSelectedEntry(null)
+    let postData = await axios.post ('http://localhost:5000/api/journal/post', newEntry);
+
+
   }
 
   const handleNewJournal = () => {

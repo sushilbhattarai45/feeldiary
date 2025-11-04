@@ -101,6 +101,8 @@ export function JournalEditor({ onSave }: JournalEditorProps) {
     setContent("")
     setCurrentEmotion(null)
     setAiReview("")
+
+
   }
 
   return (

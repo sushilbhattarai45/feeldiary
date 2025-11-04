@@ -14,6 +14,7 @@ export interface JournalEntry {
   timestamp: number
   author: string
   likes: number
+  userId:number
   isAnonymous?: boolean
 }
 
@@ -56,7 +57,7 @@ export function JournalSidebar({ entries, onNewJournal, onSelectEntry, selectedE
       <div className="p-3 border-b flex-shrink-0">
         <Button
           onClick={onNewJournal}
-          className="w-full bg-primary hover:bg-primary/90 text-white font-medium transition-all"
+          className="w-full bg-primary hover:bg-primary/90 text-white h-10 font-medium transition-all"
           size="default"
         >
           <Plus className="mr-2 h-4 w-4" />
