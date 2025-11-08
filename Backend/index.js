@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import journalRoutes from './routes/journalRoutes.js';
 import connectDb from './db/connectDb.js';
+import AuthRoutes from './routes/authRoutes.js';
 const app = express ();
 app.use (cors ());
 app.use (express.json ());
@@ -12,3 +13,4 @@ app.listen (port, () => {
 });
 
 app.use ('/api/journal', journalRoutes);
+app.use ('/api/auth', AuthRoutes);
