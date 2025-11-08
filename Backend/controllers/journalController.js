@@ -26,3 +26,17 @@ export const getAllJournals = async (req, res) => {
     res.status (500).json ({message: 'Server Error', error: error.message});
   }
 };
+
+export const getOneUserEntries = async (req, res) => {
+  try {
+    console.log ('I am here');
+
+    const {id} = req.body;
+    console.log ('I am here');
+    const userJournals = await Journal.find ({userId: id});
+    console.log (userJournals + 'hii');
+    res.status (200).json (userJournals);
+  } catch (error) {
+    res.status (500).json ({message: 'Server Error', error: error.message});
+  }
+};

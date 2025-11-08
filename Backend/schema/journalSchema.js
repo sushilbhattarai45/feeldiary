@@ -7,7 +7,7 @@ const journalSchema = new Schema ({
   aiReview: {type: String, required: true},
   isAnonymous: {type: Boolean, default: false},
   timestamp: {type: Date, default: Date.now},
-  userId: {type: Number, required: true},
+  userId: {type: String, required: true},
 });
 const Journal = mongoose.model ('Journal', journalSchema);
 export default Journal;
