@@ -11,6 +11,8 @@ type SongContextType = {
   setSong: (song: [{
     title: string
     artist: string
+
+    
     youtube_url: string
   }]) => void
 }

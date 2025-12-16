@@ -5,11 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Quote } from "lucide-react"
 
 const quotes = [
-  {
-    id: 1,
-    text: "Peace begins with a smile.",
-    author: "Mother Teresa",
-  },
+  
   {
     id: 2,
     text: "The best way out is always through.",
