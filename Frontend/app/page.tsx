@@ -18,6 +18,7 @@ import axios from "axios"
 import { JournalEntryContext } from "@/components/context/journalContext"
 import { toast, Toaster } from "sonner"
 import { UserContext } from "@/components/context/authContext"
+import { SongContext } from "@/components/context/songContext"
 interface MusicRecommendation{
   title: string
   artist: string
@@ -31,7 +32,7 @@ export default function FeelDiary() {
     getUser,
     isloggedIn,
   } = useContext (UserContext);
-
+const {song, setSong} = useContext(SongContext);
   const [loggedIn, setLoggedIn] = useState(true)
   const [currentView, setCurrentView] = useState<"landing" | "dashboard">(isloggedIn ? "dashboard" : "landing")
   const [myEntries, setMyEntries] = useState<JournalEntry[]>([])
@@ -123,10 +124,22 @@ useEffect(() => {
         }
     setSelectedEntry(null)
     let postData = await axios.post ('http://localhost:5000/api/journal/post', newEntry);
-    alert(JSON.stringify(postData.data));
-setEntries([...entries,newEntry]);
-setMusicRecommendation(postData.data.song);
-
+    console.log(JSON.stringify(postData?.data));
+setEntries([...entries,
+  {
+    ...newEntry,
+    aiReview: postData?.data?.feedback,
+    emotion: postData?.data?.emotion
+  }
+  
+]);
+alert(JSON.stringify(postData?.data));
+setSong([
+    postData?.data?.songs
+,
+  ...song,
+])
+setMusicRecommendation(postData?.data?.songs);
   }
 
   const handleNewJournal = () => {

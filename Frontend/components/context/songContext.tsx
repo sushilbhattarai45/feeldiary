@@ -3,18 +3,16 @@
 import { createContext, useContext,useState,useEffect } from "react"
 import axios from "axios"
 type SongContextType = {
-  song: [{
+  song: {
     title: string
     artist: string
     youtube_url: string
-  }],
-  setSong: (song: [{
+  }[]
+  setSong: (song: {
     title: string
     artist: string
-
-    
     youtube_url: string
-  }]) => void
+  }[]) => void
 }
 
 export const SongContext = createContext<SongContextType>({
@@ -31,13 +29,8 @@ export const SongContext = createContext<SongContextType>({
 export const SongContextProvider = ({ children }: { children: React.ReactNode }) => {
 
 
-  const [song, setSong] = useState<SongContextType["song"]>([
-    {
-        title: "",
-        artist: "",
-        youtube_url: ""
-    }
-  ])
+const [song, setSong] = useState<SongContextType["song"]>([]);
+
 
   const [ispreload, setIsPreload] = useState<boolean>(true);
   let getPreload = async () => {

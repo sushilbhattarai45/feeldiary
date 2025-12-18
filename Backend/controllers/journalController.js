@@ -11,21 +11,21 @@ export const JournalPost = async (req, res) => {
   let responseFromGenAI = await processJournal (req.body.content);
   let sendtoDB = new Journal ({
     content: req.body.content,
-    emotion: responseFromGenAI.emotion,
-    aiReview: responseFromGenAI.feedback,
+    emotion: responseFromGenAI?.emotion,
+    aiReview: responseFromGenAI?.feedback,
     isAnonymous: req.body.isAnonymous,
     userId: req.body.userId,
-    song: responseFromGenAI.song,
+    song: responseFromGenAI?.songs,
   });
 
-  console.log(responseFromGenAI);
+  console.log(sendtoDB);
   let response = await sendtoDB.save ();
 
   res.send ({
     entryData: response,
-    emotion: responseFromGenAI.emotion,
-    song: responseFromGenAI.song,
-    feedback: responseFromGenAI.feedback,
+    emotion: responseFromGenAI?.emotion,
+    song: responseFromGenAI?.songs,
+    feedback: responseFromGenAI?.feedback,
   });
 };
 
@@ -43,9 +43,9 @@ export const getOneUserEntries = async (req, res) => {
     console.log ('I am here');
 
     const {id} = req.body;
-    console.log ('I am here');
+    // console.log ('I am here');
     const userJournals = await Journal.find ({userId: id});
-    console.log (userJournals + 'hii');
+    // console.log (userJournals + 'hii');
     res.status (200).json (userJournals);
   } catch (error) {
     res.status (500).json ({message: 'Server Error', error: error.message});

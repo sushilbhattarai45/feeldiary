@@ -5,40 +5,92 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// ----------------------------
+// Gemini setup
 const ai = new GoogleGenAI(process.env.GEMINI_API_KEY, {
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+// ----------------------------
+// YouTube Music setup
 const ytmusic = new YTMusic();
-await ytmusic.initialize(); // optional: cookies for personalization
+await ytmusic.initialize();
 
 // ----------------------------
-// Helper function: safe JSON parsing from Gemini output
+// ROBUST JSON parsing from Gemini output
 function safeJSONParse(text) {
-  const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
-  return JSON.parse(cleaned);
+  try {
+    let cleaned = text
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
+
+    // Extract only JSON block
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (firstBrace === -1 || lastBrace === -1) {
+      throw new Error("No JSON object found");
+    }
+
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+
+    // Remove trailing commas
+    cleaned = cleaned
+      .replace(/,\s*}/g, "}")
+      .replace(/,\s*]/g, "]");
+
+    return JSON.parse(cleaned);
+  } catch (err) {
+    console.error("❌ JSON PARSE FAILED");
+    console.error("RAW GEMINI OUTPUT:\n", text);
+    throw err;
+  }
 }
 
 // ----------------------------
-// Preload multiple songs for a mood (before journaling)
+// Preload multiple songs for a mood
 const predefinedQueries = {
-  happy: ["Top happy pop songs 2023", "Upbeat trending songs 2022-2024", "Feel-good pop music"],
-  sad: ["Sad but uplifting songs 2022-2024", "Comforting pop songs 2020-2024", "Emotional pop tracks"],
-  motivated: ["Motivational pop songs 2023", "Energetic trending songs 2022-2024", "Workout pop hits"],
-  peaceful: ["Calm instrumental pop", "Relaxing trending music 2022-2024", "Chill piano and flute music"],
-  nostalgic: ["Popular songs from 2017-2022", "Nostalgic pop hits", "Hits from last 6-8 years"],
-  calm: ["Himalayan flute music", "Meditative pop instrumentals", "Relaxing trending tracks"],
+  happy: [
+    "Top happy pop songs 2023",
+    "Upbeat trending songs 2022-2024",
+    "Feel-good pop music",
+  ],
+  sad: [
+    "Sad but uplifting songs 2022-2024",
+    "Comforting pop songs 2020-2024",
+    "Emotional pop tracks",
+  ],
+  motivated: [
+    "Motivational pop songs 2023",
+    "Energetic trending songs 2022-2024",
+    "Workout pop hits",
+  ],
+  calm: [
+    "Calm instrumental pop",
+    "Relaxing trending music 2022-2024",
+    "Chill piano and flute music",
+  ],
+  nostalgic: [
+    "Popular songs from 2017-2022",
+    "Nostalgic pop hits",
+    "Hits from last 6-8 years",
+  ],
 };
 
 export async function preloadMoodSongs(mood, limit = 5) {
+  try{
+  console.log("Preloading songs for mood:", mood);
   const queries = predefinedQueries[mood];
+  if (!queries) return [];
+
+
   const allResults = [];
 
   for (const q of queries) {
     const searchResults = await ytmusic.search(q);
 
     const songs = searchResults
-      .filter((item) => item.videoId) // ensure it's a song/video
+      .filter((item) => item.videoId)
       .slice(0, limit);
 
     songs.forEach((song) => {
@@ -49,105 +101,138 @@ export async function preloadMoodSongs(mood, limit = 5) {
       });
     });
 
+    console.log(`Query "${q}" returned ${songs.length} songs.`);
 
-    if (allResults.length >= limit) break; // stop when enough songs collected
+    if (allResults.length >= limit) break;
   }
 
   // Remove duplicates
   const uniqueResults = Array.from(
-    new Map(allResults.map((item) => [`${item.title}-${item.artist}`, item])).values()
+    new Map(
+      allResults.map((item) => [`${item.title}-${item.artist}`, item])
+    ).values()
   ).slice(0, limit);
 
-  return uniqueResults;
+  return uniqueResults;}
+  catch(err){
+    console.error("❌ Error preloading mood songs:", err);
+    return [];
+  }
 }
 
 // ----------------------------
-// Analyze journal + recommend song
+// Gemini analysis prompt
 const analysisPrompt = `
-You are an AI that must return JSON only.
+IMPORTANT:
+- Return VALID JSON ONLY
+- Use double quotes for ALL keys and values
+- No trailing commas
+- No text before or after JSON
 
-You will be given a personal journal entry. Your tasks:
+You are an AI assistant for a teen-friendly journaling app.
 
-1. Analyze the journal and determine its primary emotion. Choose exactly one:
-   - "happy"
-   - "sad"
-   - "motivated"
-   - "anxious"
-   - "peaceful"
-   - "nostalgic"
-   - "mixed"
+Tasks:
 
-2. Recommend ONE English-language pop song that:
-   - Is popular and widely listened to
-   - Was released within the last 6–8 years (2017+)
-   - Fits the emotion:
-       • Sad/Anxious → uplifting or comforting
-       • Happy/Motivated/Peaceful/Nostalgic → enhances the positive mood
-   - Avoid explicit, harmful, AI-generated, or very old music
-   - The song must exist and be findable on YouTube
+1. Detect PRIMARY emotion (choose one):
+"happy", "sad", "motivated", "anxious", "peaceful", "nostalgic", "mixed"
 
-3. Provide a short AI feedback message (2–3 sentences max):
-   - Sad/Anxious → gentle reassurance or uplifting words
-   - Happy/Motivated/Peaceful/Nostalgic → reflect positivity or encouragement
-   - Tone: friendly, safe for teens, non-romantic, no deep psychological advice
+2. Recommend 5–6 REAL, POPULAR English pop songs (2017+):
+- sad/anxious → uplifting, hopeful, motivating
+- happy → joyful, upbeat
+- motivated → energetic, inspiring
+- peaceful → calm, soothing
+- nostalgic → warm, reflective
+- mixed → gently uplifting
 
-Return strictly JSON in this format:
+3. Each song MUST include:
+- title
+- artist
+- reason
+
+4. Write short supportive AI feedback (2–3 sentences max)
+
+RETURN THIS EXACT JSON SCHEMA:
+
 {
-  "emotion": "",
-  "song_recommendation": { "title": "", "artist": "", "reason": "" },
-  "ai_feedback": ""
+  "emotion": "string",
+  "song_recommendation": [
+    { "title": "string", "artist": "string", "reason": "string" }
+  ],
+  "ai_feedback": "string"
 }
 `;
 
+// ----------------------------
+// Analyze journal
 async function analyzeJournal(journalText) {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: analysisPrompt + `\n\nJournal Entry: "${journalText}"`,
+    contents: analysisPrompt + `\n\nJournal Entry:\n${journalText}`,
   });
 
-  const rawText = response.candidates[0].content.parts[0].text;
+  const rawText =
+    response?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!rawText) {
+    throw new Error("Empty Gemini response");
+  }
+
   return safeJSONParse(rawText);
 }
 
 // ----------------------------
-// Get latest playable YouTube link for AI-recommended song
+// Get playable YouTube link
 async function getLatestYouTubeLink(songTitle, artist) {
   const query = `${songTitle} by ${artist}`;
   const results = await ytmusic.search(query);
 
-  const songs = results.filter((item) => item.videoId !== undefined);
-  if (!songs.length) throw new Error("No song results found.");
+  const songs = results.filter((item) => item.videoId);
+  if (!songs.length) throw new Error("No YouTube results");
 
-  const recentSongs = songs.filter((s) => s.year && s.year >= new Date().getFullYear() - 8);
-  const chosenSong = recentSongs[0] || songs[0];
+  const recentSongs = songs.filter(
+    (s) => s.year && s.year >= new Date().getFullYear() - 8
+  );
+
+  const chosen = recentSongs[0] || songs[0];
 
   return {
-    title: chosenSong.name,
-    artist: chosenSong.artist?.name || "Unknown",
-    youtube_url: `https://www.youtube.com/watch?v=${chosenSong.videoId}`,
+    title: chosen.name,
+    artist: chosen.artist?.name || "Unknown",
+    youtube_url: `https://www.youtube.com/watch?v=${chosen.videoId}`,
   };
 }
 
 // ----------------------------
-// Full workflow after journal submission
+// Full workflow
 export async function processJournal(journalText) {
   try {
     const analysis = await analyzeJournal(journalText);
     console.log("Analysis:", analysis);
 
-    const youtubeData = await getLatestYouTubeLink(
-      analysis.song_recommendation.title,
-      analysis.song_recommendation.artist
+    const songsWithLinks = await Promise.all(
+      analysis.song_recommendation.map(async (song) => {
+        try {
+          const yt = await getLatestYouTubeLink(song.title, song.artist);
+          return {
+            title: yt.title,
+            artist: yt.artist,
+            youtube_url: yt.youtube_url,
+            reason: song.reason,
+          };
+        } catch {
+          return null;
+        }
+      })
     );
-    console.log("YouTube Data:", youtubeData);
 
     return {
       emotion: analysis.emotion,
-      song: youtubeData,
+      songs: songsWithLinks.filter(Boolean),
       feedback: analysis.ai_feedback,
     };
   } catch (err) {
-    console.error("Error:");
+    console.error("❌ Error processing journal:", err);
+    throw err;
   }
 }
 
@@ -155,10 +240,12 @@ export async function processJournal(journalText) {
 // Example usage
 /*
 (async () => {
-  const preSongs = await preloadMoodSongs("calm", 5);
+  const preSongs = await preloadMoodSongs("peaceful", 5);
   console.log("Preloaded Songs:", preSongs);
 
-  const result = await processJournal("I felt overwhelmed today but managed to finish all my assignments.");
-  console.log("Journal Analysis + Recommendation:", result);
+  const result = await processJournal(
+    "I felt overwhelmed today but still completed my tasks."
+  );
+  console.log("Final Result:", result);
 })();
 */

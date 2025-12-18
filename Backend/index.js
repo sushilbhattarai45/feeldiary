@@ -19,6 +19,7 @@ app.use ('/api/auth', AuthRoutes);
 //  const preSongs = await preloadMoodSongs("calm", 5);
 
 app.get ('/api/preloadMusic', (req, res) => {
+  console.log ('Preloading music called');
   preloadMoodSongs ('calm', 5).then (preSongs => {
     res.send (preSongs);
   });
