@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect,CSSProperties } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -24,6 +24,13 @@ interface MusicRecommendation{
   artist: string
   url: string
 }
+import { ClipLoader, DotLoader, RotateLoader } from "react-spinners";
+
+const override: CSSProperties = {
+  display: "block",
+  margin: "0 auto",
+  borderColor: "red",
+};
 export default function FeelDiary() {
   let {entries, setEntries,getEntries} = useContext (JournalEntryContext);
   let {
@@ -53,6 +60,32 @@ const [musicRecommendation, setMusicRecommendation] = useState<MusicRecommendati
   }, [entries])
 
 
+
+
+function Spinner() {
+  let [loading, setLoading] = useState(true);
+  let [color, setColor] = useState("#ffffff");
+
+  return (
+    <div className="sweet-loading">
+      <button onClick={() => setLoading(!loading)}>Toggle Loader</button>
+      <input
+        value={color}
+        onChange={(input) => setColor(input.target.value)}
+        placeholder="Color of the loader"
+      />
+
+      <RotateLoader
+        color={color}
+        loading={loading}
+        cssOverride={override}
+        size={150}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />
+    </div>
+  );
+}
 
   const handleSignIn =async () => {
     if (!username.trim() || !password.trim()) return
@@ -122,24 +155,63 @@ useEffect(() => {
       userId : data?.id,
 
         }
+        toast(
+  "Handling Entry Save",
+  { 
+    description: "Saving your journal entry...",
+    
+    position: "top-center",
+    duration: 10000,
+    type: "info",
+  }
+
+)
     setSelectedEntry(null)
     let postData = await axios.post ('http://localhost:5000/api/journal/post', newEntry);
-    console.log(JSON.stringify(postData?.data));
-setEntries([...entries,
-  {
-    ...newEntry,
-    aiReview: postData?.data?.feedback,
-    emotion: postData?.data?.emotion
+    console.log(JSON.stringify(postData?.data.entryData));
+
+ setEntries([
+   {
+
+    ...postData?.data?.entryData,
+    aiReview: postData?.data?.entryData?.aiReview,
+    emotion: postData?.data?.emotion,
+
   }
-  
+  ,
+  ...entries,
+ 
 ]);
-alert(JSON.stringify(postData?.data));
+
+// cm
+console.log(song)
+console.log("New Entry Saved:" );
 setSong([
-    postData?.data?.songs
+    ...postData?.data?.song
 ,
   ...song,
 ])
-setMusicRecommendation(postData?.data?.songs);
+console.log("Songs Recommendation:");
+console.log (song)
+
+
+
+if (postData?.data?.song)
+{
+  toast(
+    "Journal Saved!",
+    { 
+      description: "Your journal entry has been saved successfully.",
+      
+      position: "top-center",
+      duration: 4000,
+      type: "success",
+    }
+  
+  ) 
+}
+setSelectedEntry(newEntry);
+setMusicRecommendation(postData?.data?.song);
   }
 
   const handleNewJournal = () => {
@@ -411,7 +483,7 @@ toast(
             onNewJournal={handleNewJournal}
             onSelectEntry={setSelectedEntry}
             selectedEntryId={selectedEntry?.id}
-            data={myEntries}
+            data={entries}
           />
         </aside>
 

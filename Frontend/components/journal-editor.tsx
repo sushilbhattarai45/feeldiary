@@ -96,8 +96,8 @@ export function JournalEditor({ onSave }: JournalEditorProps) {
   }
 
   const handleSave = () => {
-    if (!content.trim() || !currentEmotion) return
-    onSave(content, currentEmotion, aiReview, false)
+    if (!content.trim()) return
+    onSave(content, 'mixed', aiReview, false)
     setContent("")
     setCurrentEmotion(null)
     setAiReview("")
@@ -140,7 +140,7 @@ export function JournalEditor({ onSave }: JournalEditorProps) {
 
               <div className="flex-shrink-0 space-y-3">
                 <div className="flex gap-2">
-                  <Button
+                  {/* <Button
                     onClick={analyzeEmotion}
                     disabled={!content.trim() || isAnalyzing}
                     className="bg-primary hover:bg-primary/90 text-white font-medium"
@@ -165,9 +165,9 @@ export function JournalEditor({ onSave }: JournalEditorProps) {
                         <Sparkles className="mr-2 h-4 w-4" />
 Check your journal                      </>
                     )}
-                  </Button>
+                  </Button> */}
 
-                  {currentEmotion && (
+                  {/* {currentEmotion && ( */}
                     <Button
                       onClick={handleSave}
                       className="bg-foreground hover:bg-foreground/90 text-white font-medium"
@@ -175,7 +175,7 @@ Check your journal                      </>
                       <Save className="mr-2 h-4 w-4" />
                       Save Entry
                     </Button>
-                  )}
+                  {/* )} */}
                 </div>
 
                 {currentEmotion && (
