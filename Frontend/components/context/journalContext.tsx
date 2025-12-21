@@ -1,49 +1,56 @@
-'use client'
-import {createContext, useState, ReactNode,useContext, useEffect } from "react"
-import { UserContext } from "./authContext"
-import axios from "axios"
+"use client";
+import {
+  createContext,
+  useState,
+  ReactNode,
+  useContext,
+  useEffect,
+} from "react";
+import { UserContext } from "./authContext";
+import axios from "axios";
 interface JournalEntry {
-  id: string
-  content: string
-  emotion: string
-  aiReview: string
-  timestamp: number
-  
+  id: string;
+  content: string;
+  emotion: string;
+  aiReview: string;
+  timestamp: number;
 }
 
-interface JournalContextType{
-    entries: JournalEntry[]
-    setEntries: (entries: JournalEntry[]) => void
-    getEntries: () => void
+interface JournalContextType {
+  entries: JournalEntry[];
+  setEntries: (entries: JournalEntry[]) => void;
+  getEntries: () => void;
 }
-
 
 export const JournalEntryContext = createContext<JournalContextType>({
-    entries:[],
-    setEntries: () => {},
-    getEntries: () => {}
-})
+  entries: [],
+  setEntries: () => {},
+  getEntries: () => {},
+});
+import instance from "@/config/axiosConfig";
+export const JournalContextProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const { isloggedIn, data } = useContext(UserContext);
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const getEntries = async () => {
+    if (data?.id) {
+      const response = await instance.post("journal/getOneUserEntries", {
+        id: data?.id,
+      });
 
-export const JournalContextProvider =({children}:{children:ReactNode})=>{
-    const {isloggedIn,data} = useContext(UserContext)
-    const [entries, setEntries] = useState<JournalEntry[]>([])
-    const getEntries = async () => {
-        if(data?.id){
-      const response = await axios.post('http://localhost:5000/api/journal/getOneUserEntries',{
-     id : data?.id
+      setEntries(response.data);
     }
-    );
-     
-    setEntries(response.data);
-        }
-    }
-    useEffect(() => {
-        getEntries();
-    }, [data?.id]);
+  };
+  useEffect(() => {
+    getEntries();
+  }, [data?.id]);
 
-    return (
-        <JournalEntryContext.Provider value={{entries, setEntries, getEntries}}>
-            {children}
-        </JournalEntryContext.Provider>
-    )
-}
+  return (
+    <JournalEntryContext.Provider value={{ entries, setEntries, getEntries }}>
+      {children}
+    </JournalEntryContext.Provider>
+  );
+};

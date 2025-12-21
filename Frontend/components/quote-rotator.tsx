@@ -1,11 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Quote } from "lucide-react"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Quote } from "lucide-react";
 
 const quotes = [
-  
   {
     id: 2,
     text: "The best way out is always through.",
@@ -26,18 +25,18 @@ const quotes = [
     text: "The only way to do great work is to love what you do.",
     author: "Steve Jobs",
   },
-]
+];
 
 export function QuoteRotator() {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % quotes.length)
-    }, 7000)
+      setCurrentIndex((prev) => (prev + 1) % quotes.length);
+    }, 7000);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="relative h-20 flex items-center justify-center bg-gradient-to-r from-gray-50  to-white border-b overflow-hidden">
@@ -51,11 +50,17 @@ export function QuoteRotator() {
           className="absolute inset-0 flex items-center justify-center px-6 h-full"
         >
           {/* I want t change the height */}
-          <div className="flex items-center gap-2 max-w-4xl  w-full  
-          ">
+          <div
+            className="flex items-center gap-2 max-w-4xl  w-full  
+          "
+          >
             <Quote className="text-primary/40 " height={100} />
-            <p className="text-xs text-gray-600 italic flex-1">"{quotes[currentIndex].text}"</p>
-            <span className="text-xs text-gray-500 font-medium flex-shrink-0">— {quotes[currentIndex].author}</span>
+            <p className="text-xs text-gray-600 italic flex-1">
+              "{quotes[currentIndex].text}"
+            </p>
+            <span className="text-xs text-gray-500 font-medium flex-shrink-0">
+              — {quotes[currentIndex].author}
+            </span>
           </div>
         </motion.div>
       </AnimatePresence>
@@ -72,5 +77,5 @@ export function QuoteRotator() {
         ))}
       </div>
     </div>
-  )
+  );
 }

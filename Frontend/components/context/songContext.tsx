@@ -1,51 +1,54 @@
-'use client'
+"use client";
 
-import { createContext, useContext,useState,useEffect } from "react"
-import axios from "axios"
+import { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 type SongContextType = {
   song: {
-    title: string
-    artist: string
-    youtube_url: string
-  }[]
-  setSong: (song: {
-    title: string
-    artist: string
-    youtube_url: string
-  }[]) => void
-}
+    title: string;
+    artist: string;
+    youtube_url: string;
+  }[];
+  setSong: (
+    song: {
+      title: string;
+      artist: string;
+      youtube_url: string;
+    }[]
+  ) => void;
+};
 
 export const SongContext = createContext<SongContextType>({
   setSong: () => {},
-  song :[{
-    title: "",
-    artist: "",
-    youtube_url: ""
-  }]
-})
-
-
-
-export const SongContextProvider = ({ children }: { children: React.ReactNode }) => {
-
-
-const [song, setSong] = useState<SongContextType["song"]>([]);
-
+  song: [
+    {
+      title: "",
+      artist: "",
+      youtube_url: "",
+    },
+  ],
+});
+import instance from "@/config/axiosConfig";
+export const SongContextProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [song, setSong] = useState<SongContextType["song"]>([]);
 
   const [ispreload, setIsPreload] = useState<boolean>(true);
   let getPreload = async () => {
-    const response = await axios.get('http://localhost:5000/api/preloadMusic')
-     setSong(response.data)
-      setIsPreload(false)
-  }
+    // const response = await axios.get("http://localhost:5000/api/preloadMusic");
+    const response = await instance.get("preloadMusic");
+    setSong(response.data);
+    setIsPreload(false);
+  };
   useEffect(() => {
-    getPreload()
-  },[ispreload])
-
+    getPreload();
+  }, [ispreload]);
 
   return (
     <SongContext.Provider value={{ song, setSong }}>
       {children}
     </SongContext.Provider>
-  )
-}
+  );
+};

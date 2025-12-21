@@ -9,8 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -97,7 +95,6 @@ export default function LandingPage() {
         );
         getEntries();
         setLoggedIn(true);
-        router.push("/home");
       }
     } catch (error) {
       toast("Login Failed", {
@@ -111,8 +108,6 @@ export default function LandingPage() {
     // setCurrentView("dashboard")
     setShowSignIn(false);
   };
-  const router = useRouter();
-
   return (
     <div className="min-h-screen bg-white animate-in fade-in duration-700">
       <nav className="border-b bg-white shadow-sm">
