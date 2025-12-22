@@ -35,13 +35,11 @@ function safeJSONParse(text) {
     cleaned = cleaned.slice(firstBrace, lastBrace + 1);
 
     // Remove trailing commas
-    cleaned = cleaned
-      .replace(/,\s*}/g, "}")
-      .replace(/,\s*]/g, "]");
+    cleaned = cleaned.replace(/,\s*}/g, "}").replace(/,\s*]/g, "]");
 
     return JSON.parse(cleaned);
   } catch (err) {
-    console.error("❌ JSON PARSE FAILED");
+    console.error(" JSON PARSE FAILED");
     console.error("RAW GEMINI OUTPUT:\n", text);
     throw err;
   }
@@ -49,73 +47,70 @@ function safeJSONParse(text) {
 
 // ----------------------------
 // Preload multiple songs for a mood
-const predefinedQueries = {
-  happy: [
-    "Top happy pop songs 2023",
-    "Upbeat trending songs 2022-2024",
-    "Feel-good pop music",
-  ],
-  sad: [
-    "Sad but uplifting songs 2022-2024",
-    "Comforting pop songs 2020-2024",
-    "Emotional pop tracks",
-  ],
-  motivated: [
-    "Motivational pop songs 2023",
-    "Energetic trending songs 2022-2024",
-    "Workout pop hits",
-  ],
-  calm: [
-    "Calm instrumental pop",
-    "Relaxing trending music 2022-2024",
-    "Chill piano and flute music",
-  ],
-  nostalgic: [
-    "Popular songs from 2017-2022",
-    "Nostalgic pop hits",
-    "Hits from last 6-8 years",
-  ],
+const predefinedQueries = (artists, languages) => {
+  const queries = [
+    `Top popular songs in ${languages.join("/")} by ${artists
+      .slice(0, 3)
+      .join("/")} songs for calm mood`,
+    `Best relaxing songs in ${languages.join("/")} by ${artists
+      .slice(0, 3)
+      .join("/")}`,
+    `Popular peaceful music in ${languages.join(
+      "/"
+    )} from artists like ${artists.slice(0, 3).join("/")}`,
+    `Top chill ${languages.join("/")} tracks by ${artists
+      .slice(0, 3)
+      .join("/")}`,
+    `Famous soothing songs in ${languages.join(
+      "/"
+    )} by artists such as ${artists.slice(0, 3).join("/")}`,
+  ];
+  return queries;
 };
+export async function preloadMoodSongs(limit = 5, request) {
+  try {
+    const queries = predefinedQueries(
+      request.body.favoriteArtists,
+      request.body.languages
+    );
+    console.log(
+      "Predefined Queries:",
+      request.body.favoriteArtists,
+      request.body.languages
+    );
+    if (!queries) return [];
 
-export async function preloadMoodSongs(mood, limit = 5) {
-  try{
-  console.log("Preloading songs for mood:", mood);
-  const queries = predefinedQueries[mood];
-  if (!queries) return [];
+    const allResults = [];
+    for (const q of queries) {
+      const searchResults = await ytmusic.search(q);
 
-
-  const allResults = [];
-
-  for (const q of queries) {
-    const searchResults = await ytmusic.search(q);
-
-    const songs = searchResults
-      .filter((item) => item.videoId)
-      .slice(0, limit);
-
-    songs.forEach((song) => {
-      allResults.push({
-        title: song.name,
-        artist: song.artist?.name || "Unknown",
-        youtube_url: `https://www.youtube.com/watch?v=${song.videoId}`,
+      //just one song per result
+      const songs = searchResults
+        .filter((item) => item.videoId)
+        .slice(0, limit);
+      songs.forEach((song) => {
+        allResults.push({
+          title: song.name,
+          artist: song.artist?.name || "Unknown",
+          youtube_url: `https://www.youtube.com/watch?v=${song.videoId}`,
+        });
       });
-    });
 
-    console.log(`Query "${q}" returned ${songs.length} songs.`);
+      console.log(`Query "${q}" returned ${songs.length} songs.`);
 
-    if (allResults.length >= limit) break;
-  }
+      if (allResults.length >= limit) break;
+    }
 
-  // Remove duplicates
-  const uniqueResults = Array.from(
-    new Map(
-      allResults.map((item) => [`${item.title}-${item.artist}`, item])
-    ).values()
-  ).slice(0, limit);
+    // Remove duplicates
+    const uniqueResults = Array.from(
+      new Map(
+        allResults.map((item) => [`${item.title}-${item.artist}`, item])
+      ).values()
+    ).slice(0, limit);
 
-  return uniqueResults;}
-  catch(err){
-    console.error("❌ Error preloading mood songs:", err);
+    return uniqueResults;
+  } catch (err) {
+    console.error(" Error preloading mood songs:", err);
     return [];
   }
 }
@@ -204,7 +199,6 @@ IMPORTANT:
 - If ANY rule cannot be followed, still return valid JSON that best follows the rules
 `;
 
-
 // ----------------------------
 // Analyze journal
 async function analyzeJournal(journalText) {
@@ -214,8 +208,7 @@ async function analyzeJournal(journalText) {
     schema: journalAnalysisSchema,
   });
 
-  const rawText =
-    response?.candidates?.[0]?.content?.parts?.[0]?.text;
+  const rawText = response?.candidates?.[0]?.content?.parts?.[0]?.text;
 
   if (!rawText) {
     throw new Error("Empty Gemini response");
@@ -275,7 +268,7 @@ export async function processJournal(journalText) {
       feedback: analysis.ai_feedback,
     };
   } catch (err) {
-    console.error("❌ Error processing journal:", err);
+    console.error(" Error processing journal:", err);
     throw err;
   }
 }
