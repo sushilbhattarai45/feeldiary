@@ -27,24 +27,29 @@ export const SongContext = createContext<SongContextType>({
     },
   ],
 });
+import { UserContext } from "./authContext";
 import instance from "@/config/axiosConfig";
 export const SongContextProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
+  const { data } = useContext(UserContext);
   const [song, setSong] = useState<SongContextType["song"]>([]);
-
   const [ispreload, setIsPreload] = useState<boolean>(true);
   let getPreload = async () => {
     // const response = await axios.get("http://localhost:5000/api/preloadMusic");
-    const response = await instance.get("preloadMusic");
+    if (!data) return;
+    const response = await instance.post("preloadMusic", {
+      favoriteArtists: data?.favoriteArtists || ["Calm music"],
+      languages: data?.languages || ["English"],
+    });
     setSong(response.data);
     setIsPreload(false);
   };
   useEffect(() => {
     getPreload();
-  }, [ispreload]);
+  }, [ispreload, data]);
 
   return (
     <SongContext.Provider value={{ song, setSong }}>

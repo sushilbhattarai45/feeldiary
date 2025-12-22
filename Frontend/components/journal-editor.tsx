@@ -109,7 +109,12 @@ export function JournalEditor({ onSave }: JournalEditorProps) {
   };
 
   return (
-    <div className="h-full mt-2 flex flex-col bg-white">
+    <div
+      style={{
+        height: "87%",
+      }}
+      className="h-full mt-2 flex flex-col bg-white"
+    >
       <div className="px-6 py-2 bg-white border-b flex-shrink-0">
         <h2 className="text-lg font-semibold text-foreground mb-0">
           Today's Journal

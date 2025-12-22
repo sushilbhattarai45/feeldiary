@@ -5,12 +5,16 @@ import { createContext, useState, ReactNode, useEffect } from "react";
 interface User {
   id: string;
   username: string;
+  favoriteArtists: string[];
+  languages: string[];
 }
 interface UserContextType {
   data: User | null;
   setUser: (data: User) => void;
   getUser: () => void;
   isloggedIn: boolean;
+  favoriteArtists?: string[];
+  languages?: string[];
   setIsloggedIn: (isloggedIn: boolean) => void;
 }
 
@@ -18,6 +22,8 @@ export const UserContext = createContext<UserContextType>({
   data: null,
   setUser: () => {},
   getUser: () => {},
+  favoriteArtists: [],
+  languages: [],
   isloggedIn: false,
   setIsloggedIn: () => {},
 });
@@ -34,7 +40,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     if (userData) {
       setData(JSON.parse(userData));
       setIsloggedIn(true);
-      //   alert("Welcome Back " + JSON.stringify(data));
     } else {
       setData(null);
       setIsloggedIn(false);

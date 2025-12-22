@@ -49,26 +49,90 @@ export default function LandingPage() {
   let { data, setUser, getUser, isloggedIn } = useContext(UserContext);
   const { song, setSong } = useContext(SongContext);
   const [loggedIn, setLoggedIn] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [langInput, setLangInput] = useState("");
+  const [artistInput, setArtistInput] = useState("");
+  const [artists, setArtists] = useState<string[]>([]);
+  // Start sign up by opening the onboarding modal. Account will only be created
+  // after the user completes onboarding selections (languages + artists).
   const handleSignUp = async () => {
     if (!username.trim() || !password.trim()) return;
-    // localStorage.setItem("feelDiaryUser", JSON.stringify({ username, isAnonymous: signInMode === "anonymous" }))
-    // setCurrentView("dashboard")
-    // setShowSignIn(false)
+    // Open onboarding and require completion before creating the account
+    setShowOnboarding(true);
+  };
 
-    const register = await instance.post("auth/register", {
-      username,
-      password,
-    });
-    toast("Registration Successful", {
-      description: "Your account has been created. Please log in.",
+  const addArtist = () => {
+    const value = artistInput.trim();
+    if (!value) return;
+    if (!artists.includes(value)) {
+      setArtists((prev) => [...prev, value]);
+    }
+    setArtistInput("");
+  };
 
-      position: "top-center",
-      duration: 4000,
-      type: "success",
-    });
-    setShowSignIn(false);
-    setUsername("");
-    setPassword("");
+  const removeArtist = (a: string) => {
+    setArtists((prev) => prev.filter((p) => p !== a));
+  };
+
+  const toggleLanguage = (lang: string) => {
+    setSelectedLanguages((prev) =>
+      prev.includes(lang) ? prev.filter((p) => p !== lang) : [...prev, lang]
+    );
+  };
+
+  useEffect(() => {
+    if (isloggedIn) {
+      router.push("/home");
+    }
+  }, [isloggedIn]);
+
+  const finalizeSignUp = async () => {
+    if (!username.trim() || !password.trim()) return;
+    if (selectedLanguages.length === 0 || artists.length === 0) {
+      toast("Complete Onboarding", {
+        description: "Please select at least one language and add an artist.",
+        position: "top-center",
+        duration: 3500,
+        type: "error",
+      });
+      return;
+    }
+
+    try {
+      const payload = {
+        username,
+        password,
+        favoriteArtists: artists,
+        languages: selectedLanguages,
+      };
+      // Attempt to register with onboard data. If backend doesn't accept
+      // preferences yet, it should still accept username/password. This call
+      // is resilient to either case.
+      const register = await instance.post("auth/register", payload);
+      toast("Registration Successful", {
+        description: "Your account has been created. Welcome!",
+        position: "top-center",
+        duration: 4000,
+        type: "success",
+      });
+      // finalize UI state
+      setShowOnboarding(false);
+      setShowSignIn(false);
+      setUsername("");
+      setPassword("");
+      setSelectedLanguages([]);
+      setArtists([]);
+      // Optionally navigate to home or login flow
+      router.push("/home");
+    } catch (error) {
+      toast("Registration Failed", {
+        description: "Unable to create account. Please try again.",
+        position: "top-center",
+        duration: 4000,
+        type: "error",
+      });
+    }
   };
   const handleSignIn = async () => {
     if (!username.trim() || !password.trim()) return;
@@ -84,8 +148,10 @@ export default function LandingPage() {
         });
         getEntries();
         setUser({
-          id: response.data.user._id,
-          username: response.data.user.username,
+          id: response?.data?.user?._id,
+          username: response?.data?.user?.username,
+          favoriteArtists: response?.data?.user?.favoriteArtists,
+          languages: response?.data?.user?.languages,
         });
         setLoggedIn(true);
         localStorage.setItem(
@@ -93,6 +159,8 @@ export default function LandingPage() {
           JSON.stringify({
             id: response.data.user,
             username: username,
+            favoriteArtists: response?.data?.user?.favoriteArtists,
+            languages: response?.data?.user?.languages,
           })
         );
         getEntries();
@@ -157,7 +225,7 @@ export default function LandingPage() {
             right: 0,
             bottom: 0,
           }}
-          className="fixed align  bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
+          className="fixed align backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
         >
           <Card className="w-full max-w-md shadow-2xl border-2 animate-in zoom-in-95 duration-300">
             <CardHeader>
@@ -263,6 +331,161 @@ export default function LandingPage() {
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
                   {signInMode === "regular" ? "Log In" : "Sign Up"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Onboarding Modal (required before account creation) */}
+      {showOnboarding && (
+        <div
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+          className="fixed align backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
+        >
+          <Card className="w-full max-w-2xl shadow-2xl border-2 animate-in zoom-in-95 duration-300">
+            <CardHeader>
+              <CardTitle className="text-2xl">
+                Tell us about your preferences
+              </CardTitle>
+              <CardDescription>
+                Select your preferred language(s) and add artists you usually
+                listen to. This helps personalize recommendations.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label className="mb-2">Preferred Languages</Label>
+                <div className="flex flex-wrap gap-3 mt-4">
+                  {["English", "Nepali", "Hindi"].map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => toggleLanguage(l)}
+                      style={{
+                        fontSize: "12px",
+                      }}
+                      className={`px-3 py-1  rounded-full border transition-colors ${
+                        selectedLanguages.includes(l)
+                          ? "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20"
+                          : "bg-white text-foreground hover:bg-slate-50"
+                      }`}
+                      aria-pressed={selectedLanguages.includes(l)}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-3 flex gap-2">
+                  <Input
+                    placeholder="Add another language"
+                    value={langInput}
+                    onChange={(e) => setLangInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && langInput.trim()) {
+                        toggleLanguage(langInput.trim());
+                        setLangInput("");
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={() => {
+                      if (langInput.trim()) {
+                        toggleLanguage(langInput.trim());
+                        setLangInput("");
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {selectedLanguages.map((l) => (
+                    <Badge
+                      key={l}
+                      className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary"
+                    >
+                      <span>{l}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLanguage(l);
+                        }}
+                        aria-label={`Remove ${l}`}
+                        className="ml-1 text-xs opacity-80 hover:opacity-100"
+                      >
+                        ✕
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-2">Favorite Artists</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    placeholder="Type artist and press Enter"
+                    value={artistInput}
+                    onChange={(e) => setArtistInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addArtist();
+                      }
+                    }}
+                  />
+                  <Button onClick={addArtist}>Add</Button>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {artists.map((a) => (
+                    <Badge
+                      key={a}
+                      className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary"
+                    >
+                      <span>{a}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeArtist(a);
+                        }}
+                        aria-label={`Remove ${a}`}
+                        className="ml-1 text-xs opacity-80 hover:opacity-100"
+                      >
+                        ✕
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // Allow user to go back and edit credentials
+                    setShowOnboarding(false);
+                    setShowSignIn(true);
+                  }}
+                  className="flex-1"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={finalizeSignUp}
+                  disabled={
+                    selectedLanguages.length === 0 || artists.length === 0
+                  }
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white font-medium"
+                >
+                  Create Account
                 </Button>
               </div>
             </CardContent>

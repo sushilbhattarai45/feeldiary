@@ -40,7 +40,6 @@ export default function RootLayout({
           <SongContextProvider>
             <JournalContextProvider>
               <Toaster />
-
               {children}
             </JournalContextProvider>
           </SongContextProvider>
