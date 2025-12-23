@@ -40,7 +40,7 @@ function safeJSONParse(text) {
     return JSON.parse(cleaned);
   } catch (err) {
     console.error(" JSON PARSE FAILED");
-    console.error("RAW GEMINI OUTPUT:\n", text);
+    console.error(" GEMINI OUTPUT:\n", text);
     throw err;
   }
 }
