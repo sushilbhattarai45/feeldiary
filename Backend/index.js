@@ -5,7 +5,11 @@ import connectDb from "./db/connectDb.js";
 import AuthRoutes from "./routes/authRoutes.js";
 import { preloadMoodSongs, processJournal } from "./config/geminiCOnfig.js";
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 app.use(express.json());
 const port = 5000;
 connectDb();
