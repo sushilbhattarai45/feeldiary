@@ -16,7 +16,7 @@ The platform prioritizes privacy, simplicity, and mental well-being, making it s
 
 ## 🖼️ Demo
 
-![FeelDiary Demo](https://via.placeholder.com/1200x600.png?text=FeelDiary+Demo+Screenshot)
+![FeelDiary Demo](https://feeldiary.vercel.app/demo.png?text=FeelDiary+Demo+Screenshot)
 
 ---
 
