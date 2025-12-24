@@ -524,49 +524,19 @@ export default function LandingPage() {
               Start Your Journey
             </Button>
             <Button
+              onClick={() =>
+                window.open(
+                  "https://github.com/sushilbhattarai45/feeldiary",
+                  "_blank"
+                )
+              }
               variant="outline"
               size="lg"
               className="text-lg px-8 py-6 border-2 bg-white"
             >
-              Learn More
+              Github{" "}
             </Button>
           </div>
-
-          {/* <div id="features" className="grid md:grid-cols-3 gap-6 mt-20">
-              <Card className="hover:shadow-lg transition-all duration-300 bg-white border">
-                <CardHeader className="space-y-4">
-                  <div className="h-14 w-14 rounded-lg bg-primary flex items-center justify-center">
-                    <PenLine className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-semibold">Express Yourself</CardTitle>
-                  <CardDescription className="leading-relaxed">
-                    Write freely in a notebook-style interface. Share publicly or anonymously in a judgment-free space.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-              <Card className="hover:shadow-lg transition-all duration-300 bg-white border">
-                <CardHeader className="space-y-4">
-                  <div className="h-14 w-14 rounded-lg bg-foreground flex items-center justify-center">
-                    <Sparkles className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-semibold">AI Insights</CardTitle>
-                  <CardDescription className="leading-relaxed">
-                    Receive empathetic, personalized feedback and emotion analysis with music and quote recommendations.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-              <Card className="hover:shadow-lg transition-all duration-300 bg-white border">
-                <CardHeader className="space-y-4">
-                  <div className="h-14 w-14 rounded-lg bg-primary flex items-center justify-center">
-                    <BookOpen className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-semibold">Track Your Journey</CardTitle>
-                  <CardDescription className="leading-relaxed">
-                    View your emotional patterns over time and celebrate your progress with weekly mood summaries.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </div> */}
         </div>
       </main>
 
