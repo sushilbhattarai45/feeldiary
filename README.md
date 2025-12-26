@@ -1,6 +1,6 @@
-# 📓 FeelDiary — AI Music Journaling Platform
+# 📓 SoulLog — AI Music Journaling Platform
 
-🔗 **Live Demo:** https://feeldiary.vercel.app/
+🔗 **Live Demo:** https://soullog.vercel.app/
 
 A calm, minimal journaling platform that understands your mood and supports reflective writing with soothing, personalized music recommendations.
 
@@ -8,7 +8,7 @@ A calm, minimal journaling platform that understands your mood and supports refl
 
 ## 🌟 Overview
 
-FeelDiary is a full-stack journaling application designed to help users reflec and focus. Users write daily journal entries, receive emotion-aware insights, and get calming music recommendations based on their mood, preferred artists, and language.
+SoulLog is a full-stack journaling application designed to help users reflec and focus. Users write daily journal entries, receive emotion-aware insights, and get calming music recommendations based on their mood, preferred artists, and language.
 
 The platform prioritizes privacy, simplicity, and mental well-being, making it suitable for teens and general users.
 
@@ -16,7 +16,7 @@ The platform prioritizes privacy, simplicity, and mental well-being, making it s
 
 ## 🖼️ Demo
 
-![FeelDiary Demo](https://feeldiary.vercel.app/demo.png?text=FeelDiary+Demo+Screenshot)
+![SoulLog Demo](https://feeldiary.vercel.app/demo.png?text=FeelDiary+Demo+Screenshot)
 
 ---
 
