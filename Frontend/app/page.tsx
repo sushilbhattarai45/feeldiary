@@ -141,7 +141,6 @@ export default function LandingPage() {
   };
   const handleSignIn = async () => {
     if (!username.trim() || !password.trim()) return;
-    // localStorage.setItem("feelDiaryUser", JSON.stringify({ username, isAnonymous: signInMode === "anonymous" }))
     try {
       let response = await instance.post("auth/login", { username, password });
       if (response.status === 200) {
@@ -195,7 +194,7 @@ export default function LandingPage() {
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <h1 className="text-2xl font-semibold text-foreground font-[family-name:var(--font-cursive)]">
-              Feel<span className="text-primary">Diary</span>
+              Soul<span className="text-primary">Log</span>
             </h1>
           </div>
           <div className="flex items-center gap-6">
@@ -206,7 +205,7 @@ export default function LandingPage() {
               {data ? `Welcome, ${data?.username}` : ""}
             </a>
             <a
-              href="https://github.com/sushilbhattarai45/feeldiary"
+              href="https://github.com/sushilbhattarai45/soullog"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Github
@@ -234,7 +233,7 @@ export default function LandingPage() {
         >
           <Card className="w-full max-w-md shadow-2xl border-2 animate-in zoom-in-95 duration-300">
             <CardHeader>
-              <CardTitle className="text-2xl">Welcome to FeelDiary</CardTitle>
+              <CardTitle className="text-2xl">Welcome to SoulLog</CardTitle>
               <CardDescription>
                 Choose how you'd like to sign in
               </CardDescription>
@@ -519,9 +518,8 @@ export default function LandingPage() {
             </h2>
             <p className="text-xl text-muted-foreground text-balance max-w-3xl mx-auto leading-relaxed">
               A calm space to journal, understand your emotions, and write with
-              music that matches your mood. FeelDiary combines private
-              journaling with AI insights to support your emotional wellness
-              journey.
+              music that matches your mood. SoulLog combines private journaling
+              with AI insights to support your emotional wellness journey.
             </p>
           </div>
 
@@ -537,7 +535,7 @@ export default function LandingPage() {
             <Button
               onClick={() =>
                 window.open(
-                  "https://github.com/sushilbhattarai45/feeldiary",
+                  "https://github.com/sushilbhattarai45/soullog",
                   "_blank"
                 )
               }
@@ -554,7 +552,7 @@ export default function LandingPage() {
       <footer className="border-t py-8 bg-white">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p className="text-lg font-semibold text-foreground mb-2 font-[family-name:var(--font-cursive)]">
-            Feel<span className="text-primary">Diary</span>
+            Soul<span className="text-primary">Log</span>
           </p>
           <p>Your private journaling space © 2025</p>
           <p className="mt-2">Made with care for your emotional wellness</p>

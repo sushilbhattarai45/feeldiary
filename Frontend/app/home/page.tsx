@@ -48,7 +48,7 @@ const override: CSSProperties = {
   margin: "0 auto",
   borderColor: "red",
 };
-export default function FeelDiary() {
+export default function SoulLog() {
   let { entries, setEntries, getEntries } = useContext(JournalEntryContext);
   let { data, setUser, getUser, isloggedIn } = useContext(UserContext);
   const { song, setSong } = useContext(SongContext);

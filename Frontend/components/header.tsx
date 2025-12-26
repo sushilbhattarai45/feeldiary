@@ -17,7 +17,7 @@ export function Header() {
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <h1 className="text-xl font-semibold text-foreground font-[family-name:var(--font-cursive)]">
-              Feel<span className="text-primary">Diary</span>
+              Soul<span className="text-primary">Log</span>
             </h1>
           </div>
           <div className="text-xs text-muted-foreground font-medium">

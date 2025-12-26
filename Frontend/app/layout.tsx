@@ -21,7 +21,7 @@ const dancingScript = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  title: "FeelDiary - Write. Reflect. Feel.",
+  title: "SoulLog - Write. Reflect. Feel.",
   description: "Your private journaling space with AI emotion analysis",
   generator: "v0.app",
 };
